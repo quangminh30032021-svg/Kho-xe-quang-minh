@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="vi">
-<!-- Kho Xe Quang Minh v1.8: Supabase products, orders, Admin authentication + Cloudinary --><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Kho Xe Quang Minh v2.1: UUID-safe order submission --><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Kho Xe Quang Minh chuyên xe đạp thể thao, xe đạp địa hình MTB, xe Road, xe trẻ em và xe đi phố. Liên hệ 0838 426 399 hoặc 0973 342 784 để được tư vấn và đặt hàng.">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="googlebot" content="index,follow,max-image-preview:large">
@@ -131,7 +131,7 @@ async function submitOrder(){
  let n=document.getElementById('customerName').value.trim(),phone=document.getElementById('customerPhone').value.trim(),address=document.getElementById('customerAddress').value.trim(),q=Number(document.getElementById('qty').value);
  if(!n||!phone||!address||!Number.isFinite(q)||q<1){alert('Vui lòng điền họ tên, số điện thoại, địa chỉ và số lượng.');return}
  const x=products[current];if(!x){alert('Không tìm thấy sản phẩm. Vui lòng tải lại trang.');return}
- const order={customer_name:n,customer_phone:phone,customer_address:address,product_id:x.id||null,product_name:x.name,product_price:moneyNumber(x.price),quantity:q,color:document.getElementById('color').value||'',size:document.getElementById('size').value||'',note:document.getElementById('customerNote').value.trim(),product_url:x.url||'',status:'Mới nhận'};
+ const order={customer_name:n,customer_phone:phone,customer_address:address,product_id:(typeof x.id==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x.id))?x.id:null,product_name:x.name,product_price:moneyNumber(x.price),quantity:q,color:document.getElementById('color').value||'',size:document.getElementById('size').value||'',note:document.getElementById('customerNote').value.trim(),product_url:x.url||'',status:'Mới nhận'};
  const btn=document.querySelector('#orderModal button[onclick="submitOrder()"]');if(btn){btn.disabled=true;btn.textContent='ĐANG GỬI...'}
  try{const {error}=await db.from('orders').insert(order);if(error)throw error;closeModal();alert('Đặt hàng thành công! Kho Xe Quang Minh đã nhận được thông tin và sẽ liên hệ xác nhận.');['customerName','customerPhone','customerAddress','customerNote'].forEach(id=>document.getElementById(id).value='');document.getElementById('qty').value='1';}
  catch(e){console.error('Order save failed',e);alert('Chưa lưu được đơn hàng: '+(e.message||'Lỗi kết nối')+'\nVui lòng thử lại hoặc gọi hotline 0838 426 399.');}
